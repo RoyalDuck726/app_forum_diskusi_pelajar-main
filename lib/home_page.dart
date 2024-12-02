@@ -3,13 +3,14 @@ import 'post_list_page.dart';
 import 'login_page.dart';
 import 'database_helper.dart';
 
-//widget utama homepage
+// Ini widget buat homepage
 class HomePage extends StatefulWidget {
   final String currentUserId;
   final String userRole;
   final bool isDarkMode;
   final VoidCallback toggleTheme;
 
+  // Konstruktor buat nerima parameter yang dibutuhin
   HomePage({
     required this.currentUserId,
     required this.userRole,
@@ -21,25 +22,26 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-//state buat homepage
+// State buat halaman beranda
 class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> categories = [];
   
   @override
   void initState() {
     super.initState();
-    _loadCategories();
+    _loadCategories(); // Muat kategori di awal-awal
   }
 
+  // Muat kategori dari database
   Future<void> _loadCategories() async {
     final dbHelper = DatabaseHelper();
     final loadedCategories = await dbHelper.getAllCategories();
     setState(() {
-      categories = loadedCategories;
+      categories = loadedCategories; // Update state dengan kategori yang udah dimuat
     });
   }
 
-  // Tambahkan method untuk menambah kategori
+  // Tampilkan dialog buat nambah kategori
   void _showAddCategoryDialog() {
     final nameController = TextEditingController();
     final colors = [
@@ -157,7 +159,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //pindah ke halaman kategori
+  // Navigasi ke halaman kategori
   void _navigateToCategory(String category) {
     Navigator.push(
       context,
@@ -173,7 +175,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //fungsi logout
+  // Fungsi buat logout
   void _logout() async {
     final dbHelper = DatabaseHelper();
     await dbHelper.logoutUser(widget.currentUserId);
@@ -188,13 +190,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //ganti tema gelap/terang
+  // Ganti tema gelap/terang
   void _toggleTheme() {
     widget.toggleTheme();
     setState(() {});
   }
 
-  //nampilin dialog kelola user
+  // Tampilkan dialog buat kelola user
   void _showUserManagement() {
     showDialog(
       context: context,
@@ -202,7 +204,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Tambahkan method untuk handle back button
+  // Handle tombol back
   Future<bool> _onWillPop() async {
     final shouldPop = await showDialog<bool>(
       context: context,
@@ -241,16 +243,19 @@ class _HomePageState extends State<HomePage> {
           title: Text('Forum Pelajar'),
           backgroundColor: isDark ? Colors.grey[850] : Colors.blue,
           actions: [
+            // Tombol buat ganti tema
             IconButton(
               icon: Icon(isDark ? Icons.brightness_7 : Icons.brightness_2),
               onPressed: _toggleTheme,
               tooltip: isDark ? 'Mode Terang' : 'Mode Gelap',
             ),
+            // Tombol buat logout
             IconButton(
               icon: Icon(Icons.logout),
               onPressed: _logout,
               tooltip: 'Keluar',
             ),
+            // Tombol buat kelola user kalo usernya server
             if (widget.userRole == 'server')
               IconButton(
                 icon: Icon(Icons.manage_accounts),
@@ -264,12 +269,12 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Tambahkan banner selamat datang
+              // Banner selamat datang
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.blue[700] : Colors.blue,
+                  color: isDark ? Colors.grey[700] : Colors.blue,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -350,7 +355,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               SizedBox(height: 16),
-              _buildCategoryGrid(),
+              _buildCategoryGrid(), // Bikin grid kategori
               if (widget.userRole == 'server')
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
@@ -371,7 +376,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  //bikin kartu kategori
+  // Bikin kartu kategori
   Widget _buildCategoryCard(String category, IconData? icon, Color color, bool isDark, {bool isAdmin = false, VoidCallback? onDelete}) {
     final categoryIcon = icon ?? Icons.school; // Default icon jika null
     return Card(
@@ -440,7 +445,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Tambahkan method untuk mendapatkan icon berdasarkan kategori
+  // Dapetin icon berdasarkan kategori
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
       case 'bahasa':
@@ -456,7 +461,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Tambahkan method untuk mendapatkan warna kategori
+  // Dapetin warna kategori
   Color _getCategoryColor(String? colorName) {
     switch (colorName) {
       case 'red':
@@ -476,7 +481,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Helper method untuk mendapatkan IconData dari string
+  // Helper buat dapetin IconData dari string
   IconData _getIconData(String iconName) {
     switch (iconName) {
       case 'menu_book':
@@ -504,6 +509,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Bikin grid kategori
   Widget _buildCategoryGrid() {
     return GridView.builder(
       shrinkWrap: true,
@@ -586,13 +592,13 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-//widget dialog kelola user
+// Widget dialog buat kelola user
 class UserManagementDialog extends StatefulWidget {
   @override
   _UserManagementDialogState createState() => _UserManagementDialogState();
 }
 
-//state buat dialog kelola user
+// State buat dialog kelola user
 class _UserManagementDialogState extends State<UserManagementDialog> {
   final dbHelper = DatabaseHelper();
   List<Map<String, dynamic>> users = [];
@@ -600,10 +606,10 @@ class _UserManagementDialogState extends State<UserManagementDialog> {
   @override
   void initState() {
     super.initState();
-    _loadUsers();
+    _loadUsers(); // Muat daftar user pas awal-awal
   }
 
-  //ambil data user dari database
+  // Ambil data user dari database
   Future<void> _loadUsers() async {
     final loadedUsers = await dbHelper.getAllUsers();
     setState(() {
@@ -611,7 +617,7 @@ class _UserManagementDialogState extends State<UserManagementDialog> {
     });
   }
 
-  //ganti badge user
+  // Ganti badge user
   Future<void> _updateBadge(String username) async {
     final badges = [
       'Siswa',
@@ -645,7 +651,7 @@ class _UserManagementDialogState extends State<UserManagementDialog> {
     }
   }
 
-  //konfirmasi hapus user
+  // Konfirmasi hapus user
   Future<void> _confirmDeleteUser(String username) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -688,7 +694,7 @@ class _UserManagementDialogState extends State<UserManagementDialog> {
     return AlertDialog(
       title: Text('Kelola User'),
       backgroundColor: isDark ? Colors.grey[850] : Colors.white,
-      //konten dialog
+      // Konten dialog
       content: Container(
         width: double.maxFinite,
         child: ListView.builder(

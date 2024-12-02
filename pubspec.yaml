@@ -93,3 +93,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  # Ini memastikan bahwa semua aset di dalam folder assets dapat diakses
+  assets:
+    - assets/create_account_header.png
+    - assets/login_header.png

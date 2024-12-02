@@ -2,29 +2,35 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseHelper {
+  // Singleton pattern untuk memastikan hanya ada satu instance dari DatabaseHelper
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
 
+  // Factory constructor untuk mengembalikan instance yang sama
   factory DatabaseHelper() => _instance;
 
+  // Private constructor
   DatabaseHelper._internal();
 
+  // Mendapatkan instance database, inisialisasi jika belum ada
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
 
+  // Inisialisasi database
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'forum_app.db');
     return await openDatabase(
       path,
       version: 3,
-      onCreate: _onCreate,
-      onUpgrade: onUpgrade,
+      onCreate: _onCreate, // Callback saat database pertama kali dibuat
+      onUpgrade: onUpgrade, // Callback saat database di-upgrade
     );
   }
 
+  // Membuat tabel-tabel saat database pertama kali dibuat
   Future<void> _onCreate(Database db, int version) async {
     //tabel user + kolom badge
     await db.execute('''
@@ -117,7 +123,7 @@ class DatabaseHelper {
     await db.insert('categories', {'name': 'Lainnya', 'color': 'blue', 'icon': 'menu_book'});
   }
 
-  //method posts
+  // Mendapatkan post berdasarkan kategori
   Future<List<Map<String, dynamic>>> getPostsByCategory(String category) async {
     final db = await database;
     return await db.query(
@@ -128,6 +134,7 @@ class DatabaseHelper {
     );
   }
 
+  // Membuat post baru
   Future<int> createPost(
     String category,
     String subCategory,
@@ -149,6 +156,7 @@ class DatabaseHelper {
     return await db.insert('posts', post);
   }
 
+  // Membuat komentar baru
   Future<int> createComment(
     int postId,
     String content,
@@ -169,7 +177,7 @@ class DatabaseHelper {
     return await db.insert('comments', comment);
   }
 
-  //method user
+  // Menambahkan pengguna baru
   Future<int> insertUser(String username, String password) async {
     final db = await database;
     return await db.insert('users', {
@@ -179,6 +187,7 @@ class DatabaseHelper {
     });
   }
 
+  // Mendapatkan data pengguna berdasarkan username
   Future<Map<String, dynamic>?> getUser(String username) async {
     final db = await database;
     final List<Map<String, dynamic>> result = await db.query(
@@ -189,7 +198,7 @@ class DatabaseHelper {
     return result.isNotEmpty ? result.first : null;
   }
 
-  //method login session
+  // Menandai pengguna sebagai login
   Future<void> setUserLoggedIn(String userId) async {
     final db = await database;
     await db.insert(
@@ -199,6 +208,7 @@ class DatabaseHelper {
     );
   }
 
+  // Logout pengguna
   Future<void> logoutUser(String userId) async {
     final db = await database;
     await db.delete(
@@ -208,7 +218,7 @@ class DatabaseHelper {
     );
   }
 
-  //method akun server
+  // Memeriksa apakah akun server sudah ada
   Future<bool> checkServerAccount() async {
     final db = await database;
     final result = await db.query(
@@ -219,6 +229,7 @@ class DatabaseHelper {
     return result.isNotEmpty;
   }
 
+  // Membuat akun server
   Future<void> createServerAccount() async {
     final db = await database;
     await db.insert('users', {
@@ -228,7 +239,7 @@ class DatabaseHelper {
     });
   }
 
-  //method voting di post
+  // Memberikan vote pada post
   Future<void> votePost(int postId, String userId, String voteType) async {
     final db = await database;
     await db.insert(
@@ -242,6 +253,7 @@ class DatabaseHelper {
     );
   }
 
+  // Mendapatkan status vote pengguna pada post
   Future<String?> getUserVoteStatus(int postId, String userId) async {
     final db = await database;
     final result = await db.query(
@@ -252,7 +264,7 @@ class DatabaseHelper {
     return result.isNotEmpty ? result.first['vote_type'] as String : null;
   }
 
-  //method voting di komen
+  // Memberikan vote pada komentar
   Future<void> voteComment(int commentId, String userId, String voteType) async {
     final db = await database;
     await db.insert(
@@ -266,6 +278,7 @@ class DatabaseHelper {
     );
   }
 
+  // Mendapatkan status vote pengguna pada komentar
   Future<String?> getCommentVoteStatus(int commentId, String userId) async {
     final db = await database;
     final result = await db.query(
@@ -276,6 +289,7 @@ class DatabaseHelper {
     return result.isNotEmpty ? result.first['vote_type'] as String : null;
   }
 
+  // Mengubah status pin pada komentar
   Future<void> togglePinComment(int commentId, bool isPinned) async {
     final db = await database;
     await db.update(
@@ -286,6 +300,7 @@ class DatabaseHelper {
     );
   }
 
+  // Menghapus post berdasarkan ID
   Future<void> deletePost(int postId) async {
     final db = await database;
     await db.transaction((txn) async {
@@ -304,6 +319,7 @@ class DatabaseHelper {
     });
   }
 
+  // Memeriksa apakah pengguna sedang login
   Future<bool> isUserLoggedIn(String userId) async {
     final db = await database;
     final result = await db.query(
@@ -314,6 +330,7 @@ class DatabaseHelper {
     return result.isNotEmpty;
   }
 
+  // Mendapatkan data post berdasarkan ID
   Future<Map<String, dynamic>?> getPost(int postId) async {
     final db = await database;
     final List<Map<String, dynamic>> result = await db.rawQuery('''
@@ -326,6 +343,7 @@ class DatabaseHelper {
     return result.isNotEmpty ? result.first : null;
   }
 
+  // Mendapatkan komentar berdasarkan ID post
   Future<List<Map<String, dynamic>>> getCommentsByPostId(int postId) async {
     final db = await database;
     return await db.query(
@@ -336,6 +354,7 @@ class DatabaseHelper {
     );
   }
 
+  // Menghapus komentar berdasarkan ID
   Future<void> deleteComment(int commentId) async {
     final db = await database;
     await db.transaction((txn) async {
@@ -354,7 +373,7 @@ class DatabaseHelper {
     });
   }
 
-  //method badge
+  // Memperbarui badge pengguna
   Future<void> updateUserBadge(String username, String badge) async {
     final db = await database;
     await db.update(
@@ -365,7 +384,7 @@ class DatabaseHelper {
     );
   }
 
-  //method semua user (untuk server)
+  // Mendapatkan semua pengguna kecuali server
   Future<List<Map<String, dynamic>>> getAllUsers() async {
     final db = await database;
     return await db.query(
@@ -376,7 +395,7 @@ class DatabaseHelper {
     );
   }
 
-  //buat hapus user
+  // Menghapus pengguna berdasarkan username
   Future<void> deleteUser(String username) async {
     final db = await database;
     //mulai transaksi buat hapus data
@@ -406,6 +425,7 @@ class DatabaseHelper {
     });
   }
 
+  // Meng-upgrade database ke versi baru
   Future<void> onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 3) {
       try {
@@ -460,12 +480,13 @@ class DatabaseHelper {
     }
   }
 
-  // Tambahkan method untuk categories
+  // Mendapatkan semua kategori
   Future<List<Map<String, dynamic>>> getAllCategories() async {
     final db = await database;
     return await db.query('categories', orderBy: 'name');
   }
 
+  // Menambahkan kategori baru
   Future<void> addCategory(String name, String color, String icon) async {
     final db = await database;
     await db.insert('categories', {
@@ -475,6 +496,7 @@ class DatabaseHelper {
     });
   }
 
+  // Menghapus kategori berdasarkan nama
   Future<void> deleteCategory(String name) async {
     final db = await database;
     await db.transaction((txn) async {
@@ -536,6 +558,7 @@ class DatabaseHelper {
     });
   }
 
+  // Mereset database
   Future<void> resetDatabase() async {
     String path = join(await getDatabasesPath(), 'forum_app.db');
     await deleteDatabase(path);
@@ -548,6 +571,7 @@ class DatabaseHelper {
     await createServerAccount();
   }
 
+  // Memperbarui jumlah vote pada post
   Future<void> updatePostVotes(int postId, int upvotes, int downvotes) async {
     final db = await database;
     await db.update(
@@ -561,8 +585,7 @@ class DatabaseHelper {
     );
   }
 
-
-  // Method untuk mendapatkan status vote post
+  // Mendapatkan status vote post
   Future<String?> getPostVoteStatus(int postId, String userId) async {
     final db = await database;
     final result = await db.query(
@@ -573,7 +596,7 @@ class DatabaseHelper {
     return result.isNotEmpty ? result.first['vote_type'] as String : null;
   }
 
-  // Method untuk update votes comment
+  // Memperbarui jumlah vote pada komentar
   Future<void> updateCommentVotes(int commentId, int upvotes, int downvotes) async {
     final db = await database;
     await db.update(
@@ -587,6 +610,7 @@ class DatabaseHelper {
     );
   }
 
+  // Menghapus vote pada post
   Future<void> deletePostVote(int postId, String userId) async {
     final db = await database;
     await db.delete(
@@ -596,6 +620,7 @@ class DatabaseHelper {
     );
   }
 
+  // Menghapus vote pada komentar
   Future<void> deleteCommentVote(int commentId, String userId) async {
     final db = await database;
     await db.delete(
@@ -605,7 +630,7 @@ class DatabaseHelper {
     );
   }
 
-  // Method untuk mendapatkan komentar berdasarkan ID
+  // Mendapatkan komentar berdasarkan ID
   Future<Map<String, dynamic>?> getCommentById(int commentId) async {
     final db = await database;
     final results = await db.query(

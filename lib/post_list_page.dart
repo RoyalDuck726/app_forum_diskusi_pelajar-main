@@ -24,10 +24,12 @@ class PostListPage extends StatefulWidget {
 }
 
 class _PostListPageState extends State<PostListPage> {
+  // Inisialisasi DatabaseHelper untuk mengelola database
   final dbHelper = DatabaseHelper();
   List<Map<String, dynamic>> posts = [];
   String? imageBase64;
   
+  // Daftar subkategori berdasarkan kategori
   final Map<String, List<String>> subCategories = {
     'akademik': ['Tugas', 'Ujian', 'Materi'],
     'non-akademik': ['Kegiatan', 'Pengumuman', 'Lainnya'],
@@ -38,16 +40,18 @@ class _PostListPageState extends State<PostListPage> {
   @override
   void initState() {
     super.initState();
-    _loadPosts();
+    _loadPosts(); // Memuat daftar post saat inisialisasi
   }
 
+  // Memuat post berdasarkan kategori
   Future<void> _loadPosts() async {
     final loadedPosts = await dbHelper.getPostsByCategory(widget.category);
     setState(() {
-      posts = loadedPosts;
+      posts = loadedPosts; // Memperbarui state dengan post yang dimuat
     });
   }
 
+  // Mengubah tema aplikasi
   void _toggleTheme() {
     widget.toggleTheme();
     setState(() {
@@ -496,6 +500,7 @@ class _PostListPageState extends State<PostListPage> {
     );
   }
 
+  // Membuat post baru
   Future<void> _createPost() async {
     final titleController = TextEditingController();
     final contentController = TextEditingController();
@@ -622,6 +627,7 @@ class _PostListPageState extends State<PostListPage> {
     );
   }
 
+  // Menghapus post berdasarkan ID
   Future<void> _deletePost(int postId) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -648,6 +654,7 @@ class _PostListPageState extends State<PostListPage> {
     }
   }
 
+  // Memberikan vote pada post
   Future<void> _votePost(int postId, String voteType) async {
     try {
       // Dapatkan status vote sebelumnya
@@ -691,6 +698,7 @@ class _PostListPageState extends State<PostListPage> {
     }
   }
 
+  // Menampilkan dialog untuk menambah komentar
   Future<void> _showCommentDialog(int postId) async {
     final commentController = TextEditingController();
     bool isLoading = false;
@@ -848,6 +856,7 @@ class _PostListPageState extends State<PostListPage> {
     );
   }
 
+  // Memilih gambar dari galeri
   Future<void> _pickImage() async {
     try {
       // Tampilkan loading indicator
@@ -899,6 +908,7 @@ class _PostListPageState extends State<PostListPage> {
     }
   }
 
+  // Menghapus komentar berdasarkan ID
   Future<void> _deleteComment(int commentId) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -928,6 +938,7 @@ class _PostListPageState extends State<PostListPage> {
     }
   }
 
+  // Memberikan vote pada komentar
   Future<void> _voteComment(int commentId, String voteType) async {
     try {
       // Dapatkan status vote sebelumnya
@@ -975,6 +986,7 @@ class _PostListPageState extends State<PostListPage> {
     }
   }
 
+  // Membangun widget badge berdasarkan jenis badge
   Widget _buildBadge(String badge) {
     Color badgeColor;
     IconData badgeIcon;
@@ -1027,6 +1039,7 @@ class _PostListPageState extends State<PostListPage> {
     );
   }
 
+  // Mengubah status pin pada komentar
   Future<void> _togglePinComment(int commentId, bool currentlyPinned) async {
     try {
       await dbHelper.togglePinComment(commentId, !currentlyPinned);
@@ -1045,6 +1058,7 @@ class _PostListPageState extends State<PostListPage> {
     }
   }
 
+  // Memformat tanggal dan waktu
   String _formatDateTime(String? dateTimeStr) {
     if (dateTimeStr == null) return '';
     
@@ -1067,6 +1081,7 @@ class _PostListPageState extends State<PostListPage> {
     }
   }
 
+  // Membangun konten post
   Widget _buildPostContent(Map<String, dynamic> post) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1080,7 +1095,7 @@ class _PostListPageState extends State<PostListPage> {
     );
   }
 
-  // Fungsi untuk memproses gambar di isolate terpisah
+  // Memproses gambar di background thread
   Future<String?> _processImageInBackground(List<int> imageBytes) async {
     if (imageBytes.length > 1 * 1024 * 1024) { // 1MB limit
       return null;
@@ -1088,7 +1103,7 @@ class _PostListPageState extends State<PostListPage> {
     return compute(base64Encode, imageBytes); // Proses di background thread
   }
 
-  // Untuk menampilkan gambar
+  // Menampilkan gambar
   Widget _buildImage(String? base64String) {
     if (base64String == null || base64String.isEmpty) {
       return Container();
